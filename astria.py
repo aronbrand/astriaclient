@@ -2,15 +2,17 @@ from pathlib import Path
 import requests
 import argparse
 import random
-import logging
 import json
 import os
 import sys
 import time
+import logging
+import shelve
+
 from urllib.parse import urlparse
 import http.client as http_client
 
-# Client for Astria API
+# Client SDK for Astria API
 class Astria():
     def __init__(self, apikey):
         self.apikey = apikey
@@ -58,14 +60,18 @@ class Astria():
 
         while True:
             info = self.promptinfo (tuneid, promptid).json()
-            print('.', end='', flush=True)
+            self.reportprogress()
             if (info['images']):
-                print ()
                 break
             time.sleep(2.5)
-
+            
+        self.reportprogress(done = True)
         return 0
 
+    def reportprogress (self, done = False):
+        print('.', end='', flush=True)
+        if (done):
+            print ()
 
     def download(self, tuneid, promptid, wait=False):
         if (wait):
@@ -77,27 +83,42 @@ class Astria():
         for url in promptinfo['images']:
             outfile = Path(str(tuneid) + '_' + str(promptinfo['id']) + '_' + str(promptinfo['seed']) + '_' + str(i) + '.jpg')
             if outfile.exists():
-                print(str(outfile) + " already exists - skipping\n")
+                logging.info(str(outfile) + " already exists - skipping")
                 continue
 
             response = requests.get (url)
             outf = open (outfile, "wb")
             outf.write(response.content)
             outf.close()
-            print(str(outfile) + " DONE\n")
+            logging.info (str(outfile) + " DONE\n")
             i = i + 1
 
-    def downloadAll(self, tuneid, limit=10):
-        lastprompts = self.list(tuneid, 0).json()
+    def downloadAll(self, tuneid, limit, dbfile):
+        results = 0
+        assert (limit > 0)
 
-        i = 1
-        for prompt in lastprompts:
-            self.download(tuneid, prompt['id'])
-            if (i == limit):
-                break
-            i = i + 1
+        with shelve.open(dbfile, flag='c') as db:
+            while (1):
+                lastprompts = self.list(tuneid, results).json()
+
+                if not lastprompts:
+                    return
+
+                for prompt in lastprompts:
+                    id = prompt['id']
+                    if str(id) in db:
+                        logging.info("prompt " + str(id) +  " already downloaded - skipping")
+                    elif prompt['images']:
+                        self.download(tuneid, id)
+                        db[str(id)] = prompt
+                    results = results + 1
+                    if (results > limit):
+                        return
 
 
+
+####################################
+# Command line interface
 def do_gen(args):
     astria = Astria(args.key)
     results = []
@@ -136,7 +157,7 @@ def do_download(args):
 
 def do_download_all(args):
     astria = Astria(args.key)
-    astria.downloadAll(args.tuneid, args.limit)
+    astria.downloadAll(args.tuneid, args.limit, args.db)
 
 def environ_or_required(key):
     return (
@@ -185,10 +206,12 @@ def main() -> int:
     parser_downloadall = subparsers.add_parser('downloadall', help='Download recent images')
     parser_downloadall.add_argument('tuneid', type=int, help='Astria Tune ID')
     parser_downloadall.add_argument('--limit', type=int, help='Maximum number of prompts to download', default=10)
+    parser_downloadall.add_argument('--db', type=str, help='Keep list of previously downloaded prompts in a DB file', default="astriacache")
     parser_downloadall.set_defaults(func=do_download_all)
 
     args=parser.parse_args()
 
+    logging.getLogger('root').setLevel(logging.INFO)
     if (args.debug):
         http_client.HTTPConnection.debuglevel = 1
         logging.basicConfig()
