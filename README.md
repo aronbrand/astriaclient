@@ -20,7 +20,7 @@ Optional arguments:
  
 ### Usage for gen action:
 
-astria.py gen [--seed SEED] [--steps STEPS] [--download]
+python astria.py gen [--seed SEED] [--steps STEPS] [--download]
                      tuneid prompts [prompts ...]
 
 - --seed SEED
@@ -29,26 +29,26 @@ astria.py gen [--seed SEED] [--steps STEPS] [--download]
 
 ### Usage for tune action:
 
-astria.py tune [--test] title classname images [images ...]
+python astria.py tune [--test] title classname images [images ...]
 
     title       Descriptive name for this tuning
     classname   Dreambooth classname (style, person, man, woman etc)
     images      At least 10 image filenames
   
 ### Usage for list action:
-astria.py list tuneid
+python astria.py list tuneid
 
 ### Usage for listtune action:
-astria.py listtune 
+python astria.py listtune 
 
 ### Usage for info action:
-astria.py info tuneid promptid
+python astria.py info tuneid promptid
 
 - tuneid      Astria Tune ID
 - promptid    Prompt ID
 
 ### Usage for download acation:
-astria.py download [--wait] tuneid promptid
+python astria.py download [--wait] tuneid promptid
   
 - tuneid      Astria Tune ID
 - promptid    Prompt ID
@@ -57,7 +57,7 @@ astria.py download [--wait] tuneid promptid
 - --wait      Wait for results to be ready
 
 ### Usage for downloadall acation:
-astria.py downloadall [--limit LIMIT] [--db DB] [tuneids ...]
+python astria.py downloadall [--limit LIMIT] [--db DB] [tuneids ...]
 - tuneids        One or more Astria Tune IDs, or emtpy to download entire account
 
   optional arguments:
