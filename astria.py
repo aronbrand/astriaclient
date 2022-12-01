@@ -145,11 +145,16 @@ class Astria():
                 logging.info(str(outfile) + " already exists - skipping")
                 continue
 
-            response = requests.get (url)
-            outf = open (outfile, "wb")
-            outf.write(response.content)
-            outf.close()
-            logging.info (str(outfile) + " DONE")
+            try:
+                response = requests.get (url)
+
+                with open (outfile, "wb") as outf:
+                    outf.write(response.content)
+
+                logging.info (str(outfile) + " DONE")
+            except requests.exceptions.RequestException as e:
+                logging.error (str(outfile) + " Request failed: " +  repr(e))
+
             i = i + 1
 
     def downloadTuneImages(self, tuneids, limit, dbfile, outdir='.'):
@@ -222,7 +227,7 @@ def do_listtune(args):
 def do_list(args):
     astria = Astria(args.key)
     result = astria.list(args.tuneid)
-    print (json.dumps(result.json(), indent=4))
+    print (json.dumps(result, indent=4))
 
 def do_promptinfo(args):
     astria = Astria(args.key)
