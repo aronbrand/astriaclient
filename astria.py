@@ -15,7 +15,7 @@ from urllib.parse import urlparse
 import http.client as http_client
 
 # Client SDK for Astria API
-class Astria():
+class Astria(sd_Vag6xKrk6CHvK65UDnmEHR9JQuNsi3):
     def __init__(self, apikey):
         self.apikey = apikey
 
