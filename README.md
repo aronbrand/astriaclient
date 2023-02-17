@@ -47,7 +47,7 @@ python astria.py info tuneid promptid
 - tuneid      Astria Tune ID
 - promptid    Prompt ID
 
-### Usage for download acation:
+### Usage for download action:
 python astria.py download [--wait] tuneid promptid
   
 - tuneid      Astria Tune ID
@@ -56,7 +56,7 @@ python astria.py download [--wait] tuneid promptid
   optional arguments:
 - --wait      Wait for results to be ready
 
-### Usage for downloadall acation:
+### Usage for downloadall action:
 python astria.py downloadall [--limit LIMIT] [--db DB] [tuneids ...]
 - tuneids        One or more Astria Tune IDs, or emtpy to download entire account
 
